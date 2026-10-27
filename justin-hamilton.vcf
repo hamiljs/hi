@@ -1,0 +1,13 @@
+BEGIN:VCARD
+VERSION:3.0
+N:Hamilton;Justin;;;
+FN:Justin Hamilton
+ORG:Hamilton Development Company
+TITLE:President
+TEL;TYPE=WORK,VOICE:+15022031154
+EMAIL;TYPE=WORK:justin.hamilton@hamiltondevco.com
+URL:https://hamiltondevco.com
+URL:https://www.linkedin.com/in/bardstownjustin
+ADR;TYPE=WORK:;;;Bardstown;KY;;USA
+NOTE:Met at the KAM / Kentucky MEP reception, Owensboro, Oct 2026. Automation, plant software and AI for manufacturers.
+END:VCARD

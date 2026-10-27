@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Justin Hamilton · Hamilton Development Company</title>
+<meta name="description" content="Justin Hamilton, President, Hamilton Development Company. Automation, plant software and AI for manufacturers.">
+<meta name="theme-color" content="#0f172a">
+<style>
+  :root{--bg:#0f172a;--panel:#1e293b;--ink:#f8fafc;--mute:#94a3b8;--ok:#22c55e;--bad:#ef4444;--acc:#f59e0b}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh;padding:env(safe-area-inset-top) 16px 32px}
+  .wrap{max-width:440px;margin:0 auto}
+  header{padding:20px 0 12px}
+  h1{font-size:26px}
+  .sub{color:var(--mute)}
+  .card{background:var(--panel);border-radius:16px;padding:16px;margin-top:14px}
+  .btn{display:block;width:100%;text-align:center;padding:14px;border-radius:12px;font-weight:700;font-size:17px;text-decoration:none;border:0;margin-top:10px;cursor:pointer}
+  .primary{background:var(--acc);color:#111}
+  .ghost{background:transparent;color:var(--ink);border:1px solid #334155}
+  .row{display:flex;gap:10px}.row .btn{flex:1}
+  canvas{display:block;width:100%;height:220px;background:#0b1220;border-radius:12px;touch-action:manipulation}
+  .hud{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums;margin:8px 0 2px;color:var(--mute);font-size:14px}
+  .hud b{color:var(--ink)}
+  .result{display:none;text-align:center;padding:6px 0}
+  .result .big{font-size:34px;font-weight:800;color:var(--acc)}
+  h2{font-size:18px;margin-bottom:4px}
+  .small{font-size:13px;color:var(--mute)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Justin Hamilton</h1>
+    <div class="sub">President, Hamilton Development Company</div>
+    <div class="sub">Automation, plant software and AI for manufacturers. 15 years in Kentucky plants.</div>
+  </header>
+
+  <a class="btn primary" href="justin-hamilton.vcf" download>Save my contact</a>
+  <div class="row">
+    <a class="btn ghost" href="tel:+15022031154">Call</a>
+    <a class="btn ghost" href="sms:+15022031154">Text</a>
+    <a class="btn ghost" href="mailto:justin.hamilton@hamiltondevco.com?subject=Met%20you%20in%20Owensboro">Email</a>
+  </div>
+
+  <div class="card" id="game">
+    <h2>Quality gate: 20 seconds</h2>
+    <div class="small">Parts run down the line. Tap the cracked ones (red) before they ship. Leave the good ones alone.</div>
+    <div class="hud"><span>Time <b id="t">20</b></span><span>Caught <b id="c">0</b></span><span>Escaped <b id="e">0</b></span><span>Scrapped <b id="s">0</b></span></div>
+    <canvas id="cv"></canvas>
+    <button class="btn primary" id="go">Start the line</button>
+    <div class="result" id="res">
+      <div class="small">Your quality score</div>
+      <div class="big" id="score">0%</div>
+      <div id="msg" class="small"></div>
+      <button class="btn ghost" id="again">Run another shift</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>What I can help with</h2>
+    <div class="small">Mold and PM tracking, plant reports that write themselves, AI agents that take the busywork, and vision inspection pilots. From someone who launched seat lines at Toyota Boshoku and ran automation at Magna.</div>
+    <a class="btn ghost" href="https://hamiltondevco.com">hamiltondevco.com</a>
+    <a class="btn ghost" href="https://www.linkedin.com/in/bardstownjustin">LinkedIn</a>
+  </div>
+</div>
+
+<script>
+const cv=document.getElementById('cv'),cx=cv.getContext('2d');
+let W,H,parts,run=false,t0,last,spawnT,caught,esc,scrap,good;
+function size(){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;cv.width=r.width*d;cv.height=r.height*d;cx.setTransform(d,0,0,d,0,0);W=r.width;H=r.height}
+size();addEventListener('resize',size);
+const $=id=>document.getElementById(id);
+function reset(){parts=[];caught=esc=scrap=good=0;spawnT=0;upd()}
+function upd(){$('c').textContent=caught;$('e').textContent=esc;$('s').textContent=scrap}
+function spawn(el){const lane=Math.floor(Math.random()*3);parts.push({x:-30,y:H*(0.25+lane*0.25),r:18,bad:Math.random()<0.3,v:70+el*9+Math.random()*30,rot:Math.random()*6,dead:0})}
+function gear(p){cx.save();cx.translate(p.x,p.y);cx.rotate(p.rot);
+  cx.fillStyle=p.bad?'#b91c1c':'#64748b';cx.beginPath();
+  for(let i=0;i<16;i++){const a=i*Math.PI/8,rr=i%2?p.r:p.r*0.78;cx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}cx.closePath();cx.fill();
+  cx.fillStyle='#0b1220';cx.beginPath();cx.arc(0,0,p.r*0.32,0,7);cx.fill();
+  if(p.bad){cx.strokeStyle='#fecaca';cx.lineWidth=2;cx.beginPath();cx.moveTo(-p.r*.6,-p.r*.5);cx.lineTo(-p.r*.1,0);cx.lineTo(-p.r*.3,p.r*.2);cx.lineTo(p.r*.4,p.r*.6);cx.stroke()}
+  cx.restore()}
+function draw(){cx.clearRect(0,0,W,H);
+  for(let l=0;l<3;l++){const y=H*(0.25+l*0.25);cx.fillStyle='#1f2937';cx.fillRect(0,y-22,W,44);
+    cx.strokeStyle='#334155';for(let x=((performance.now()/12)%24)-24;x<W;x+=24){cx.beginPath();cx.moveTo(x,y-22);cx.lineTo(x,y+22);cx.stroke()}}
+  cx.fillStyle='rgba(245,158,11,.25)';cx.fillRect(W-28,0,28,H);
+  cx.fillStyle='#f59e0b';cx.font='bold 11px sans-serif';cx.save();cx.translate(W-10,H/2);cx.rotate(-Math.PI/2);cx.textAlign='center';cx.fillText('SHIP TO CUSTOMER',0,0);cx.restore();
+  for(const p of parts){if(p.dead){cx.globalAlpha=Math.max(0,1-p.dead/.3);gear(p);cx.globalAlpha=1}else gear(p)}}
+function loop(now){if(!run)return;const dt=Math.min(.05,(now-last)/1000);last=now;const el=(now-t0)/1000,left=Math.max(0,20-el);
+  $('t').textContent=Math.ceil(left);spawnT-=dt;if(spawnT<=0){spawn(el);spawnT=Math.max(.28,.9-el*.03)}
+  for(const p of parts){if(p.dead){p.dead+=dt;continue}p.x+=p.v*dt;p.rot+=dt*2;
+    if(p.x>W-28){p.dead=.001;if(p.bad){esc++;if(navigator.vibrate)navigator.vibrate(60)}else good++;upd()}}
+  parts=parts.filter(p=>p.dead<.3);draw();
+  if(left<=0)return end();requestAnimationFrame(loop)}
+function tap(ev){if(!run)return;ev.preventDefault();const r=cv.getBoundingClientRect(),pt=ev.touches?ev.touches[0]:ev,x=pt.clientX-r.left,y=pt.clientY-r.top;
+  let best=null,bd=1e9;for(const p of parts){if(p.dead)continue;const d=Math.hypot(p.x-x,p.y-y);if(d<p.r+16&&d<bd){bd=d;best=p}}
+  if(!best)return;best.dead=.001;if(best.bad)caught++;else{scrap++;if(navigator.vibrate)navigator.vibrate(30)}upd()}
+cv.addEventListener('touchstart',tap,{passive:false});cv.addEventListener('mousedown',tap);
+function start(){reset();run=true;$('go').style.display='none';$('res').style.display='none';t0=last=performance.now();requestAnimationFrame(loop)}
+function end(){run=false;const bad=caught+esc,shipped=good+esc,q=bad?Math.round(100*caught/bad):100,pen=Math.min(q,scrap*5),sc=Math.max(0,q-pen);
+  $('score').textContent=sc+'%';
+  $('msg').textContent=esc===0&&scrap===0?'Zero escapes, zero scrap. You should run a plant. Save my number anyway.'
+    :esc>0?`${esc} cracked part${esc>1?'s':''} reached the customer. A camera on the line does not blink. Ask me about vision inspection.`
+    :`No escapes, but ${scrap} good part${scrap>1?'s':''} scrapped. Over-rejection costs money too. That is the hard part of inspection.`;
+  $('res').style.display='block'}
+$('go').onclick=start;$('again').onclick=start;draw();
+</script>
+</body>
+</html>
