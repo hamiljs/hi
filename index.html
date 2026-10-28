@@ -15,17 +15,31 @@
   h1{font-size:26px}
   .sub{color:var(--mute)}
   .card{background:var(--panel);border-radius:16px;padding:16px;margin-top:14px}
-  .btn{display:block;width:100%;text-align:center;padding:14px;border-radius:12px;font-weight:700;font-size:17px;text-decoration:none;border:0;margin-top:10px;cursor:pointer}
+  .btn{display:block;width:100%;text-align:center;padding:14px;border-radius:12px;font-weight:700;font-size:17px;text-decoration:none;border:0;margin-top:10px;cursor:pointer;font-family:inherit}
   .primary{background:var(--acc);color:#111}
   .ghost{background:transparent;color:var(--ink);border:1px solid #334155}
   .row{display:flex;gap:10px}.row .btn{flex:1}
-  canvas{display:block;width:100%;height:220px;background:#0b1220;border-radius:12px;touch-action:manipulation}
+  canvas{display:block;width:100%;height:260px;background:#0b1220;border-radius:12px;touch-action:manipulation;margin-top:6px}
   .hud{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums;margin:8px 0 2px;color:var(--mute);font-size:14px}
   .hud b{color:var(--ink)}
   .result{display:none;text-align:center;padding:6px 0}
-  .result .big{font-size:34px;font-weight:800;color:var(--acc)}
+  .result .big{font-size:38px;font-weight:800;color:var(--acc)}
   h2{font-size:18px;margin-bottom:4px}
   .small{font-size:13px;color:var(--mute)}
+  input{width:100%;padding:12px;border-radius:10px;border:1px solid #334155;background:#0b1220;color:var(--ink);font-size:16px;margin-top:8px;font-family:inherit}
+  .hp{position:absolute;left:-9999px;height:0;width:0;opacity:0}
+  .msg{margin-top:8px;font-size:14px;min-height:1em}
+  .msg.ok{color:var(--ok)}.msg.err{color:#fca5a5}
+  .hl{outline:2px solid var(--acc);outline-offset:3px;transition:outline .3s}
+  ol.lb{list-style:none;counter-reset:r;margin-top:8px}
+  ol.lb li{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px solid #334155;counter-increment:r;font-variant-numeric:tabular-nums}
+  ol.lb li:before{content:counter(r);width:22px;color:var(--mute);font-weight:700}
+  ol.lb li:nth-child(1):before{content:"🥇"}ol.lb li:nth-child(2):before{content:"🥈"}ol.lb li:nth-child(3):before{content:"🥉"}
+  ol.lb .who{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  ol.lb .who span{color:var(--mute);font-size:13px}
+  ol.lb .pts{font-weight:800;color:var(--acc)}
+  ol.lb .me{background:#33415555}
+  .lv{color:var(--mute);font-size:12px}
 </style>
 </head>
 <body>
@@ -36,25 +50,59 @@
     <div class="sub">Automation, software, web and marketing. 15 years in Kentucky plants.</div>
   </header>
 
-  <a class="btn primary" href="justin-hamilton.vcf" download>Save my contact</a>
+  <a class="btn primary" id="save" href="justin-hamilton.vcf" download>Save my contact</a>
   <div class="row">
     <a class="btn ghost" href="tel:+15022031154">Call</a>
     <a class="btn ghost" href="sms:+15022031154">Text</a>
     <a class="btn ghost" href="mailto:justin.hamilton@hamiltondevco.com?subject=Met%20you%20in%20Owensboro">Email</a>
   </div>
 
+  <div class="card" id="swap">
+    <h2>Swap contacts</h2>
+    <div class="small">Leave yours and I will follow up. 30 seconds.</div>
+    <form id="swapf" autocomplete="on">
+      <input name="name" placeholder="Your name" autocomplete="name" required>
+      <input name="company" placeholder="Company" autocomplete="organization" required>
+      <input name="email" type="email" placeholder="Email" autocomplete="email" inputmode="email">
+      <input name="phone" type="tel" placeholder="Phone (or email above)" autocomplete="tel">
+      <input name="note" placeholder="What are you working on? (optional)">
+      <input name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button class="btn primary" type="submit">Send Justin my info</button>
+      <div class="msg" id="swapmsg"></div>
+    </form>
+  </div>
+
   <div class="card" id="game">
-    <h2>Quality gate: 20 seconds</h2>
-    <div class="small">Parts run down the line. Tap the cracked ones (red) before they ship. Leave the good ones alone.</div>
-    <div class="hud"><span>Time <b id="t">20</b></span><span>Caught <b id="c">0</b></span><span>Escaped <b id="e">0</b></span><span>Scrapped <b id="s">0</b></span></div>
+    <h2>Quality Gate</h2>
+    <div class="small">Tap the cracked parts before they ship. Leave the good ones alone. Three escapes and the customer shuts your line down. Every level gets harder.</div>
+    <div class="hud"><span>Level <b id="lv">1</b></span><span>Score <b id="sc">0</b></span><span>Line <b id="hp">❤️❤️❤️</b></span><span>Best <b id="best">0</b></span></div>
     <canvas id="cv"></canvas>
     <button class="btn primary" id="go">Start the line</button>
     <div class="result" id="res">
-      <div class="small">Your quality score</div>
-      <div class="big" id="score">0%</div>
-      <div id="msg" class="small"></div>
+      <div class="small">Final score</div>
+      <div class="big" id="score">0</div>
+      <div class="small" id="reached"></div>
+      <div id="msg" class="small" style="margin-top:6px"></div>
+      <form id="postf">
+        <div id="postfields">
+          <div class="small" style="margin-top:12px">Post it to the leaderboard. Name and company show. Your email or phone goes only to Justin.</div>
+          <input name="name" placeholder="Your name" autocomplete="name" required>
+          <input name="company" placeholder="Company" autocomplete="organization" required>
+          <input name="email" type="email" placeholder="Email" autocomplete="email" inputmode="email">
+          <input name="phone" type="tel" placeholder="Phone (or email above)" autocomplete="tel">
+          <input name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        </div>
+        <button class="btn primary" type="submit" id="postbtn">Post my score</button>
+        <div class="msg" id="postmsg"></div>
+      </form>
       <button class="btn ghost" id="again">Run another shift</button>
     </div>
+  </div>
+
+  <div class="card" id="board">
+    <h2>Leaderboard</h2>
+    <div class="small" id="plays">Loading…</div>
+    <ol class="lb" id="lb"></ol>
   </div>
 
   <div class="card">
@@ -67,46 +115,110 @@
     <a class="btn ghost" href="https://www.linkedin.com/in/bardstownjustin">LinkedIn</a>
   </div>
 </div>
-</div>
 
 <script>
-const cv=document.getElementById('cv'),cx=cv.getContext('2d');
-let W,H,parts,run=false,t0,last,spawnT,caught,esc,scrap,good;
+const API='https://n8n.berrybloom.agency/api/w/clawdbot/jobs/run_wait_result/p/f/clawdbot/hi_card';
+const TOK='HvVlANEv6ZReEdCwOlCEjCkBkFnCsGOx'; // Windmill token scoped to run f/clawdbot/hi_card only
+const $=id=>document.getElementById(id);
+async function call(body){const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+TOK},body:JSON.stringify(body)});
+  if(!r.ok)throw new Error('Server busy. Try again.');return r.json()}
+const me=JSON.parse(localStorage.getItem('hi_me')||'{}');
+function fill(f){for(const k of['name','company','email','phone'])if(me[k]&&f[k])f[k].value=me[k]}
+function remember(d){Object.assign(me,{name:d.name,company:d.company,email:d.email,phone:d.phone});localStorage.setItem('hi_me',JSON.stringify(me))}
+function formData(f){const d={};for(const k of['name','company','email','phone','note','website'])if(f[k])d[k]=f[k].value.trim();return d}
+function check(d){if(!d.name||!d.company)return'Name and company, please.';if(!d.email&&!d.phone)return'Add an email or a phone number.';return''}
+function say(el,t,ok){el.textContent=t;el.className='msg '+(ok?'ok':'err')}
+let myScoreKey='';
+function renderBoard(b){if(!b||!b.top)return;$('plays').textContent=b.plays?`${b.plays} shift${b.plays>1?'s':''} posted. Can you take the top spot?`:'No scores yet. Be the first on the board.';
+  $('lb').innerHTML='';for(const r of b.top){const li=document.createElement('li');if(myScoreKey&&(r.name+'|'+r.company).toLowerCase()===myScoreKey)li.className='me';
+    const w=document.createElement('div');w.className='who';w.textContent=r.name+' ';const s=document.createElement('span');s.textContent=r.company;w.appendChild(s);
+    const lv=document.createElement('span');lv.className='lv';lv.textContent='L'+r.level;const p=document.createElement('div');p.className='pts';p.textContent=r.score.toLocaleString();
+    li.append(w,lv,p);$('lb').appendChild(li)}}
+function loadBoard(){call({action:'board'}).then(renderBoard).catch(()=>{$('plays').textContent='Leaderboard is offline for a moment.'})}
+loadBoard();setInterval(()=>{if(!document.hidden&&!run)loadBoard()},30000);
+
+// Swap contacts
+fill($('swapf'));
+$('save').addEventListener('click',()=>{if(me.sent)return;setTimeout(()=>{$('swap').scrollIntoView({behavior:'smooth',block:'center'});$('swap').classList.add('hl');$('swapf').name.focus({preventScroll:true})},900)});
+$('swapf').addEventListener('submit',async e=>{e.preventDefault();const f=e.target,d=formData(f),m=$('swapmsg'),err=check(d);if(err)return say(m,err);
+  const b=f.querySelector('button');b.disabled=true;say(m,'Sending…',true);
+  try{const r=await call({action:'lead',...d});if(!r.ok)throw new Error(r.error);remember(d);me.sent=1;localStorage.setItem('hi_me',JSON.stringify(me));
+    say(m,`Got it, ${d.name.split(' ')[0]}. Justin will be in touch.`,true);$('swap').classList.remove('hl');b.textContent='Sent ✓'}
+  catch(x){say(m,x.message||'Could not send. Try again.');b.disabled=false}});
+
+// Game
+const cv=$('cv'),cx=cv.getContext('2d');
+let W,H,parts=[],run=false,last,spawnT,lvl,lvT,score,lives,combo,banner,bannerT,caught,scrap,shake=0;
+let best=+localStorage.getItem('hi_best')||0;$('best').textContent=best;
 function size(){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;cv.width=r.width*d;cv.height=r.height*d;cx.setTransform(d,0,0,d,0,0);W=r.width;H=r.height}
 size();addEventListener('resize',size);
-const $=id=>document.getElementById(id);
-function reset(){parts=[];caught=esc=scrap=good=0;spawnT=0;upd()}
-function upd(){$('c').textContent=caught;$('e').textContent=esc;$('s').textContent=scrap}
-function spawn(el){const lane=Math.floor(Math.random()*3);parts.push({x:-30,y:H*(0.25+lane*0.25),r:18,bad:Math.random()<0.3,v:70+el*9+Math.random()*30,rot:Math.random()*6,dead:0})}
+const LEVELS=[
+ {name:'Day shift',lanes:3,speed:70,gap:.95,bad:.30,red:1,crack:1},
+ {name:'Rush order',lanes:3,speed:95,gap:.75,bad:.32,red:1,crack:1},
+ {name:'Fourth line opens',lanes:4,speed:100,gap:.62,bad:.33,red:1,crack:1},
+ {name:'Night shift: no red paint',lanes:4,speed:105,gap:.60,bad:.33,red:0,crack:1},
+ {name:'Hairline cracks',lanes:4,speed:115,gap:.55,bad:.35,red:0,crack:.55},
+ {name:'Mixed speeds',lanes:4,speed:120,gap:.50,bad:.35,red:0,crack:.5,mix:1},
+];
+function L(){const i=Math.min(lvl,LEVELS.length)-1,b=LEVELS[i],x=Math.max(0,lvl-LEVELS.length);
+  return {...b,name:x?`Overtime ${x}`:b.name,speed:b.speed*(1+.12*x),gap:Math.max(.28,b.gap-.03*x),crack:Math.max(.35,b.crack-.03*x),mix:b.mix||x>0}}
+const LEVEL_SECS=15;
+function laneY(i,n){return H*(i+1)/(n+1)}
+function hud(){$('lv').textContent=lvl;$('sc').textContent=score.toLocaleString();$('hp').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives)}
+function reset(){parts=[];lvl=1;lvT=0;score=0;lives=3;combo=0;caught=scrap=0;spawnT=.3;showBanner();hud()}
+function showBanner(){banner=`LEVEL ${lvl}: ${L().name}`;bannerT=1.6}
+function spawn(){const c=L(),lane=Math.floor(Math.random()*c.lanes),r=c.lanes>3?16:18;
+  parts.push({x:-30,y:laneY(lane,c.lanes),r,bad:Math.random()<c.bad,red:c.red,crack:c.crack,v:c.speed*(c.mix?(.7+Math.random()*.8):(1+Math.random()*.3)),rot:Math.random()*6,dead:0,hit:0})}
 function gear(p){cx.save();cx.translate(p.x,p.y);cx.rotate(p.rot);
-  cx.fillStyle=p.bad?'#b91c1c':'#64748b';cx.beginPath();
+  cx.fillStyle=p.bad&&p.red?'#b91c1c':'#64748b';cx.beginPath();
   for(let i=0;i<16;i++){const a=i*Math.PI/8,rr=i%2?p.r:p.r*0.78;cx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}cx.closePath();cx.fill();
   cx.fillStyle='#0b1220';cx.beginPath();cx.arc(0,0,p.r*0.32,0,7);cx.fill();
-  if(p.bad){cx.strokeStyle='#fecaca';cx.lineWidth=2;cx.beginPath();cx.moveTo(-p.r*.6,-p.r*.5);cx.lineTo(-p.r*.1,0);cx.lineTo(-p.r*.3,p.r*.2);cx.lineTo(p.r*.4,p.r*.6);cx.stroke()}
-  cx.restore()}
-function draw(){cx.clearRect(0,0,W,H);
-  for(let l=0;l<3;l++){const y=H*(0.25+l*0.25);cx.fillStyle='#1f2937';cx.fillRect(0,y-22,W,44);
-    cx.strokeStyle='#334155';for(let x=((performance.now()/12)%24)-24;x<W;x+=24){cx.beginPath();cx.moveTo(x,y-22);cx.lineTo(x,y+22);cx.stroke()}}
+  if(p.bad){const k=p.crack;cx.strokeStyle=p.red?'#fecaca':'#e2e8f0';cx.lineWidth=k<1?1.3:2;cx.beginPath();
+    cx.moveTo(-p.r*.6*k,-p.r*.5*k);cx.lineTo(-p.r*.1*k,0);cx.lineTo(-p.r*.3*k,p.r*.2*k);cx.lineTo(p.r*.4*k,p.r*.6*k);cx.stroke()}
+  cx.restore();
+  if(p.hit){cx.globalAlpha=Math.max(0,1-p.dead/.5);cx.fillStyle=p.hit>0?'#22c55e':'#ef4444';cx.font='bold 14px sans-serif';cx.textAlign='center';
+    cx.fillText(p.hit>0?'+'+p.hit:p.hit,p.x,p.y-p.r-6-p.dead*30);cx.globalAlpha=1}}
+function draw(){cx.save();if(shake>0)cx.translate((Math.random()-.5)*8,0);cx.clearRect(-10,0,W+20,H);
+  const n=run?L().lanes:3;for(let l=0;l<n;l++){const y=laneY(l,n);cx.fillStyle='#1f2937';cx.fillRect(0,y-20,W,40);
+    cx.strokeStyle='#334155';for(let x=((performance.now()/12)%24)-24;x<W;x+=24){cx.beginPath();cx.moveTo(x,y-20);cx.lineTo(x,y+20);cx.stroke()}}
   cx.fillStyle='rgba(245,158,11,.25)';cx.fillRect(W-28,0,28,H);
   cx.fillStyle='#f59e0b';cx.font='bold 11px sans-serif';cx.save();cx.translate(W-10,H/2);cx.rotate(-Math.PI/2);cx.textAlign='center';cx.fillText('SHIP TO CUSTOMER',0,0);cx.restore();
-  for(const p of parts){if(p.dead){cx.globalAlpha=Math.max(0,1-p.dead/.3);gear(p);cx.globalAlpha=1}else gear(p)}}
-function loop(now){if(!run)return;const dt=Math.min(.05,(now-last)/1000);last=now;const el=(now-t0)/1000,left=Math.max(0,20-el);
-  $('t').textContent=Math.ceil(left);spawnT-=dt;if(spawnT<=0){spawn(el);spawnT=Math.max(.28,.9-el*.03)}
+  if(run){cx.fillStyle='#334155';cx.fillRect(0,0,W,4);cx.fillStyle='#f59e0b';cx.fillRect(0,0,W*Math.min(1,lvT/LEVEL_SECS),4)}
+  for(const p of parts){if(p.dead){cx.globalAlpha=Math.max(0,1-p.dead/.5);gear(p);cx.globalAlpha=1}else gear(p)}
+  if(combo>=5&&run){cx.fillStyle='#22c55e';cx.font='bold 13px sans-serif';cx.textAlign='left';cx.fillText(`COMBO x${1+Math.floor(combo/5)}`,8,20)}
+  if(bannerT>0){cx.globalAlpha=Math.min(1,bannerT);cx.fillStyle='rgba(11,18,32,.85)';cx.fillRect(0,H/2-24,W,48);cx.fillStyle='#f59e0b';
+    cx.font='bold 18px sans-serif';cx.textAlign='center';cx.fillText(banner,W/2,H/2+6);cx.globalAlpha=1}
+  cx.restore()}
+function loop(now){if(!run)return;const dt=Math.min(.05,(now-last)/1000);last=now;
+  lvT+=dt;if(lvT>=LEVEL_SECS){lvT=0;lvl++;score+=100*lvl;showBanner();hud()}
+  bannerT-=dt;shake-=dt;spawnT-=dt;if(spawnT<=0){spawn();spawnT=L().gap*(.8+Math.random()*.4)}
   for(const p of parts){if(p.dead){p.dead+=dt;continue}p.x+=p.v*dt;p.rot+=dt*2;
-    if(p.x>W-28){p.dead=.001;if(p.bad){esc++;if(navigator.vibrate)navigator.vibrate(60)}else good++;upd()}}
-  parts=parts.filter(p=>p.dead<.3);draw();
-  if(left<=0)return end();requestAnimationFrame(loop)}
+    if(p.x>W-28){p.dead=.001;if(p.bad){lives--;combo=0;shake=.3;p.hit=0;if(navigator.vibrate)navigator.vibrate(120);hud();if(lives<=0)return end()}else{score+=1;hud()}}}
+  parts=parts.filter(p=>p.dead<.5);draw();requestAnimationFrame(loop)}
 function tap(ev){if(!run)return;ev.preventDefault();const r=cv.getBoundingClientRect(),pt=ev.touches?ev.touches[0]:ev,x=pt.clientX-r.left,y=pt.clientY-r.top;
-  let best=null,bd=1e9;for(const p of parts){if(p.dead)continue;const d=Math.hypot(p.x-x,p.y-y);if(d<p.r+16&&d<bd){bd=d;best=p}}
-  if(!best)return;best.dead=.001;if(best.bad)caught++;else{scrap++;if(navigator.vibrate)navigator.vibrate(30)}upd()}
+  let bp=null,bd=1e9;for(const p of parts){if(p.dead)continue;const d=Math.hypot(p.x-x,p.y-y);if(d<p.r+14&&d<bd){bd=d;bp=p}}
+  if(!bp)return;bp.dead=.001;
+  if(bp.bad){combo++;caught++;const pts=10*lvl*(1+Math.floor(combo/5));score+=pts;bp.hit=pts}
+  else{combo=0;scrap++;score=Math.max(0,score-15*lvl);bp.hit=-15*lvl;if(navigator.vibrate)navigator.vibrate(40)}hud()}
 cv.addEventListener('touchstart',tap,{passive:false});cv.addEventListener('mousedown',tap);
-function start(){reset();run=true;$('go').style.display='none';$('res').style.display='none';t0=last=performance.now();requestAnimationFrame(loop)}
-function end(){run=false;const bad=caught+esc,shipped=good+esc,q=bad?Math.round(100*caught/bad):100,pen=Math.min(q,scrap*5),sc=Math.max(0,q-pen);
-  $('score').textContent=sc+'%';
-  $('msg').textContent=esc===0&&scrap===0?'Zero escapes, zero scrap. You should run a plant. Save my number anyway.'
-    :esc>0?`${esc} cracked part${esc>1?'s':''} reached the customer. A camera on the line does not blink. Ask me about vision inspection.`
-    :`No escapes, but ${scrap} good part${scrap>1?'s':''} scrapped. Over-rejection costs money too. That is the hard part of inspection.`;
-  $('res').style.display='block'}
+function start(){size();reset();run=true;$('go').style.display='none';$('res').style.display='none';last=performance.now();requestAnimationFrame(loop)}
+let final={};
+function end(){run=false;draw();final={score,level:lvl};
+  if(score>best){best=score;localStorage.setItem('hi_best',best);$('best').textContent=best}
+  $('score').textContent=score.toLocaleString();$('reached').textContent=`Reached level ${lvl}: ${L().name}. ${caught} caught, ${scrap} good parts scrapped.`;
+  $('msg').textContent=lvl>=4?'Most people miss the cracks once the red paint goes away. A camera on the line does not blink. Ask me about vision inspection.'
+    :'Three escapes reached the customer. A camera on the line does not blink. Ask me about vision inspection.';
+  const f=$('postf');fill(f);const known=me.name&&me.company&&(me.email||me.phone);$('postfields').style.display=known?'none':'block';
+  $('postbtn').textContent=known?`Post as ${me.name} (${me.company})`:'Post my score';$('postbtn').disabled=false;$('postmsg').textContent='';
+  $('res').style.display='block';$('res').scrollIntoView({behavior:'smooth',block:'nearest'})}
+$('postf').addEventListener('submit',async e=>{e.preventDefault();const f=e.target,m=$('postmsg');
+  const d=$('postfields').style.display==='none'?{name:me.name,company:me.company,email:me.email||'',phone:me.phone||''}:formData(f);
+  const err=check(d);if(err){$('postfields').style.display='block';return say(m,err)}
+  $('postbtn').disabled=true;say(m,'Posting…',true);
+  try{const r=await call({action:'score',...d,score:final.score,level:final.level});if(!r.ok)throw new Error(r.error);
+    remember(d);myScoreKey=(d.name+'|'+d.company).toLowerCase();renderBoard(r);
+    say(m,r.rank===1?'You are #1. Defend it.':`You are #${r.rank}. ${r.rank<=10?'You made the board.':'Run another shift to climb.'}`,true);$('postbtn').textContent='Posted ✓'}
+  catch(x){say(m,x.message||'Could not post. Try again.');$('postbtn').disabled=false}});
 $('go').onclick=start;$('again').onclick=start;draw();
 </script>
 </body>
