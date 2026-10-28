@@ -4,17 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Justin Hamilton · Hamilton Development Company</title>
-<meta name="description" content="Justin Hamilton, President, Hamilton Development Company. Automation, plant software and AI for manufacturers.">
+<meta name="description" content="Justin Hamilton, President, Hamilton Development Company. Automation, software, web, marketing and bourbon brands. Three arcade games inside.">
 <meta name="theme-color" content="#0f172a">
 <style>
   :root{--bg:#0f172a;--panel:#1e293b;--ink:#f8fafc;--mute:#94a3b8;--ok:#22c55e;--bad:#ef4444;--acc:#f59e0b}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh;padding:env(safe-area-inset-top) 16px 32px}
+  body{background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh;padding:env(safe-area-inset-top) 16px 32px;overflow-x:hidden}
   .wrap{max-width:440px;margin:0 auto}
   header{padding:12px 0 2px}
   .top{display:flex;align-items:center;gap:12px;justify-content:space-between}
   .pill{flex:none;background:var(--acc);color:#111;font-weight:800;font-size:14px;line-height:1.15;text-align:center;text-decoration:none;padding:9px 14px;border-radius:12px}
-  #game{margin-top:10px}
   h1{font-size:23px}
   .sub{color:var(--mute)}
   .card{background:var(--panel);border-radius:16px;padding:16px;margin-top:14px}
@@ -44,22 +43,36 @@
   ol.lb .pts{font-weight:800;color:var(--acc)}
   ol.lb .me{background:#33415555}
   .lv{color:var(--mute);font-size:12px}
-  #game{border:2px solid var(--acc);box-shadow:0 0 0 0 rgba(245,158,11,.5);animation:glow 2.4s ease-in-out infinite}
-  @keyframes glow{50%{box-shadow:0 0 22px 2px rgba(245,158,11,.45)}}
+  /* game deck: swipe left/right between games */
+  .tabs{display:flex;gap:6px;margin-top:12px}
+  .tabs button{flex:1;border:1px solid #334155;background:transparent;color:var(--mute);font-weight:700;font-size:13px;line-height:1.1;font-family:inherit;padding:8px 4px;border-radius:999px;cursor:pointer}
+  .tabs button.on{background:var(--gc,var(--acc));border-color:var(--gc,var(--acc));color:#111}
+  .deck{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -16px}
+  .deck::-webkit-scrollbar{display:none}
+  .deck.locked{overflow-x:hidden}
+  .slide{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;min-width:0;padding:0 16px 4px}
+  .game{margin-top:10px;--gc:#f59e0b;border:2px solid var(--gc);animation:glow 2.4s ease-in-out infinite}
+  @keyframes glow{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 22px 2px color-mix(in srgb,var(--gc) 45%,transparent)}}
   .gh{display:flex;align-items:center;gap:8px}.tag{background:#ef4444;color:#fff;font-size:11px;font-weight:800;letter-spacing:.08em;padding:3px 7px;border-radius:6px}
+  .gh .topic{margin-left:auto;font-size:12px;color:var(--gc);font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+  .swipe{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:8px;color:var(--mute);font-size:12px}
+  .dots{display:flex;gap:6px}.dots i{width:7px;height:7px;border-radius:50%;background:#334155;display:block}.dots i.on{background:var(--acc)}
+  .nudge{animation:nudge 1.8s ease-in-out infinite;display:inline-block}
+  @keyframes nudge{50%{transform:translateX(5px)}}
   .stage{position:relative}
   .splash{position:absolute;inset:0;margin-top:6px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;cursor:pointer;
     background:radial-gradient(ellipse at center,rgba(11,18,32,.55) 0%,rgba(11,18,32,.88) 75%);-webkit-tap-highlight-color:transparent}
   .splash .kick{font-size:12px;font-weight:800;letter-spacing:.2em;color:#fca5a5}
   .splash .ttl{font-size:40px;line-height:.95;font-weight:900;letter-spacing:.02em;font-style:italic;color:#fff;
-    text-shadow:3px 3px 0 #ef4444,6px 6px 0 #f59e0b;animation:bob 1.6s ease-in-out infinite}
+    text-shadow:3px 3px 0 #ef4444,6px 6px 0 var(--gc);animation:bob 1.6s ease-in-out infinite}
   @keyframes bob{50%{transform:translateY(-4px) rotate(-1deg)}}
-  .splash .play{margin-top:8px;background:var(--acc);color:#111;font-weight:900;font-size:22px;padding:12px 30px;border-radius:999px;border:0;font-family:inherit;
-    box-shadow:0 5px 0 #b45309;animation:pulse 1.1s ease-in-out infinite}
+  .splash .play{margin-top:8px;background:var(--gc);color:#111;font-weight:900;font-size:22px;padding:12px 30px;border-radius:999px;border:0;font-family:inherit;
+    box-shadow:0 5px 0 rgba(0,0,0,.45);animation:pulse 1.1s ease-in-out infinite}
   @keyframes pulse{50%{transform:scale(1.08)}}
-  .splash .beat{font-size:14px;color:var(--ink);font-weight:700}.splash .beat b{color:var(--acc)}
+  .splash .beat{font-size:14px;color:var(--ink);font-weight:700}.splash .beat b{color:var(--gc)}
   .splash .how{font-size:12px;color:var(--mute)}
-  @media (prefers-reduced-motion:reduce){#game,.splash .ttl,.splash .play{animation:none}}
+  .need .btn{margin-top:16px}.need .btn:first-of-type{margin-top:10px}
+  @media (prefers-reduced-motion:reduce){.game,.splash .ttl,.splash .play,.nudge{animation:none}}
 </style>
 </head>
 <body>
@@ -71,39 +84,9 @@
     </div>
   </header>
 
-  <div class="card" id="game">
-    <div class="gh"><h2>🎮 Quality Gate</h2><span class="tag">ARCADE</span></div>
-    <div class="small">Tap the cracked parts before they ship. Leave good ones alone. 3 escapes and your line is down.</div>
-    <div class="hud"><span>Level <b id="lv">1</b></span><span>Score <b id="sc">0</b></span><span>Line <b id="hp">❤️❤️❤️</b></span><span>Best <b id="best">0</b></span></div>
-    <div class="stage"><canvas id="cv"></canvas>
-      <div class="splash" id="splash" role="button" aria-label="Play Quality Gate">
-        <div class="kick">★ ARCADE CHALLENGE ★</div>
-        <div class="ttl">QUALITY<br>GATE</div>
-        <div class="beat" id="beat">Get on the leaderboard</div>
-        <button class="play" id="go" type="button">▶ PLAY</button>
-        <div class="how">Tap the cracked gears. Levels get harder.</div>
-      </div></div>
-    <div class="result" id="res">
-      <div class="small">Final score</div>
-      <div class="big" id="score">0</div>
-      <div class="small" id="reached"></div>
-      <div id="msg" class="small" style="margin-top:6px"></div>
-      <form id="postf" autocomplete="on">
-        <div id="postfields">
-          <div class="small" style="margin-top:12px">Post it to the leaderboard. Name and company show. Your email or phone goes only to Justin.</div>
-          <button class="btn ghost pick" type="button" hidden>Fill from my phone contacts</button><div class="small iostip" hidden>Tip: tap "Your name", then tap <b>AutoFill Contact</b> above the keyboard.</div>
-          <input name="name" placeholder="Your name" autocomplete="name" required>
-          <input name="company" placeholder="Company" autocomplete="organization" required>
-          <input name="email" type="email" placeholder="Email" autocomplete="email" inputmode="email">
-          <input name="phone" type="tel" placeholder="Phone (or email above)" autocomplete="tel">
-          <input name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-        </div>
-        <button class="btn primary" type="submit" id="postbtn">Post my score</button>
-        <div class="msg" id="postmsg"></div>
-      </form>
-      <button class="btn ghost" id="again">Run another shift</button>
-    </div>
-  </div>
+  <div class="tabs" id="tabs" role="tablist"></div>
+  <div class="deck" id="deck"></div>
+  <div class="swipe"><span class="dots" id="dots"></span><span id="swipehint">Swipe for more games <span class="nudge">→</span></span></div>
 
   <div class="card" id="swap">
     <button class="btn primary" type="button" id="openswap" style="margin-top:0">Send Justin my contact</button>
@@ -119,7 +102,7 @@
       <button class="btn primary" type="submit">Send it</button>
       <div class="msg" id="swapmsg"></div>
     </form>
-    <div class="sub" style="margin-top:14px">Automation, software, web and marketing. 15 years in Kentucky plants.</div>
+    <div class="sub" style="margin-top:14px">Automation, software, web, marketing and bourbon brands. 15 years in Kentucky plants.</div>
     <div class="row">
       <a class="btn ghost" href="tel:+15022031154">Call</a>
       <a class="btn ghost" href="sms:+15022031154">Text</a>
@@ -128,21 +111,60 @@
   </div>
 
   <div class="card" id="board">
-    <h2>Leaderboard</h2>
+    <h2 id="lbtitle">Leaderboard</h2>
     <div class="small" id="plays">Loading…</div>
     <ol class="lb" id="lb"></ol>
   </div>
 
-  <div class="card">
+  <div class="card need">
     <h2>What do you need?</h2>
     <a class="btn primary" href="https://hamiltondevco.com">Automation &amp; software</a>
     <div class="small" style="margin-top:6px">Mold and PM tracking, plant reports that write themselves, AI agents that take the busywork, vision inspection pilots.</div>
-    <a class="btn primary" href="https://berrybloom.agency" style="margin-top:16px">Web &amp; marketing</a>
+    <a class="btn primary" href="https://berrybloom.agency">Web &amp; marketing</a>
     <div class="small" style="margin-top:6px">Websites, SEO, ads and lead follow-up that get you found and get you calls.</div>
+    <a class="btn primary" href="https://timeywimeysolutions.com">Bourbon &amp; beverage brands</a>
+    <div class="small" style="margin-top:6px">A bourbon, wine or beer brand, from idea to bottles on a shelf.</div>
     <div class="small" style="margin-top:16px">From someone who launched seat lines at Toyota Boshoku and ran automation at Magna.</div>
+    <a class="btn ghost" href="https://bardstownjustin.com">Bardstown Justin: my story, writing &amp; speaking</a>
     <a class="btn ghost" href="https://www.linkedin.com/in/bardstownjustin">LinkedIn</a>
   </div>
 </div>
+
+<template id="tpl">
+  <div class="slide"><div class="card game">
+    <div class="gh"><h2 class="gname"></h2><span class="tag">ARCADE</span><span class="topic"></span></div>
+    <div class="small ghow"></div>
+    <div class="hud"><span>Level <b class="hlv">1</b></span><span>Score <b class="sc">0</b></span><span>Lives <b class="lives">❤️❤️❤️</b></span><span>Best <b class="best">0</b></span></div>
+    <div class="stage"><canvas></canvas>
+      <div class="splash" role="button">
+        <div class="kick">★ ARCADE CHALLENGE ★</div>
+        <div class="ttl"></div>
+        <div class="beat">Get on the leaderboard</div>
+        <button class="play" type="button">▶ PLAY</button>
+        <div class="how"></div>
+      </div></div>
+    <div class="result">
+      <div class="small">Final score</div>
+      <div class="big score">0</div>
+      <div class="small reached"></div>
+      <div class="small endmsg" style="margin-top:6px"></div>
+      <form class="postf" autocomplete="on">
+        <div class="postfields">
+          <div class="small" style="margin-top:12px">Post it to the leaderboard. Name and company show. Your email or phone goes only to Justin.</div>
+          <button class="btn ghost pick" type="button" hidden>Fill from my phone contacts</button><div class="small iostip" hidden>Tip: tap "Your name", then tap <b>AutoFill Contact</b> above the keyboard.</div>
+          <input name="name" placeholder="Your name" autocomplete="name" required>
+          <input name="company" placeholder="Company" autocomplete="organization" required>
+          <input name="email" type="email" placeholder="Email" autocomplete="email" inputmode="email">
+          <input name="phone" type="tel" placeholder="Phone (or email above)" autocomplete="tel">
+          <input name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        </div>
+        <button class="btn primary postbtn" type="submit">Post my score</button>
+        <div class="msg postmsg"></div>
+      </form>
+      <button class="btn ghost again" type="button">Play again</button>
+    </div>
+  </div></div>
+</template>
 
 <script>
 const API='https://n8n.berrybloom.agency/api/w/clawdbot/jobs/run_wait_result/p/f/clawdbot/hi_card';
@@ -155,15 +177,172 @@ function fill(f){for(const k of['name','company','email','phone'])if(me[k]&&f[k]
 function remember(d){Object.assign(me,{name:d.name,company:d.company,email:d.email,phone:d.phone});localStorage.setItem('hi_me',JSON.stringify(me))}
 function formData(f){const d={};for(const k of['name','company','email','phone','note','website'])if(f[k])d[k]=f[k].value.trim();return d}
 function check(d){if(!d.name||!d.company)return'Name and company, please.';if(!d.email&&!d.phone)return'Add an email or a phone number.';return''}
-function say(el,t,ok){el.textContent=t;el.className='msg '+(ok?'ok':'err')}
-let myScoreKey='';
-function renderBoard(b){if(!b||!b.top)return;const t=b.top[0];$('beat').innerHTML=t?`Score to beat: <b>${t.score.toLocaleString()}</b>`:'Be the first on the board';$('plays').textContent=b.plays?`${b.plays} shift${b.plays>1?'s':''} posted. Can you take the top spot?`:'No scores yet. Be the first on the board.';
-  $('lb').innerHTML='';for(const r of b.top){const li=document.createElement('li');if(myScoreKey&&(r.name+'|'+r.company).toLowerCase()===myScoreKey)li.className='me';
+function say(el,t,ok){el.textContent=t;el.className=el.className.replace(/ (ok|err)$/,'')+' '+(ok?'ok':'err')}
+
+// ---------- the three games ----------
+// Every game is the same engine: things ride lanes toward an end zone.
+// Tap the targets before they reach it (a miss costs a life). Leave the rest alone (tapping one costs points).
+const LEVEL_SECS=15;
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+const GAMES=[
+{id:'quality',topic:'Manufacturing',tab:'🏭 Plant',color:'#f59e0b',name:'🎮 Quality Gate',ttl:'QUALITY<br>GATE',
+ how:'Tap the cracked parts before they ship. Leave good ones alone. 3 escapes and your line is down.',splash:'Tap the cracked gears. Levels get harder.',
+ zone:'SHIP TO CUSTOMER',belt:'#1f2937',r:18,
+ levels:[{name:'Day shift',lanes:3,speed:70,gap:.95,bad:.30,hint:1,size:1},{name:'Rush order',lanes:3,speed:95,gap:.75,bad:.32,hint:1,size:1},
+  {name:'Fourth line opens',lanes:4,speed:100,gap:.62,bad:.33,hint:1,size:1},{name:'Night shift: no red paint',lanes:4,speed:105,gap:.60,bad:.33,hint:0,size:1},
+  {name:'Hairline cracks',lanes:4,speed:115,gap:.55,bad:.35,hint:0,size:.55},{name:'Mixed speeds',lanes:4,speed:120,gap:.50,bad:.35,hint:0,size:.5,mix:1}],
+ draw(c,p){const r=p.r;c.rotate(p.rot);c.fillStyle=p.t&&p.hint?'#b91c1c':'#64748b';c.beginPath();
+  for(let i=0;i<16;i++){const a=i*Math.PI/8,q=i%2?r:r*.78;c.lineTo(Math.cos(a)*q,Math.sin(a)*q)}c.closePath();c.fill();
+  c.fillStyle='#0b1220';c.beginPath();c.arc(0,0,r*.32,0,7);c.fill();
+  if(p.t){const k=p.size;c.strokeStyle=p.hint?'#fecaca':'#e2e8f0';c.lineWidth=k<1?1.3:2;c.beginPath();
+   c.moveTo(-r*.6*k,-r*.5*k);c.lineTo(-r*.1*k,0);c.lineTo(-r*.3*k,r*.2*k);c.lineTo(r*.4*k,r*.6*k);c.stroke()}},
+ caught:'caught',missed:'good parts scrapped',
+ end:l=>l>=4?'Most people miss the cracks once the red paint goes away. A camera on the line does not blink. Ask me about vision inspection.'
+  :'Three escapes reached the customer. A camera on the line does not blink. Ask me about vision inspection.'},
+
+{id:'marketing',topic:'Marketing',tab:'📣 Marketing',color:'#38bdf8',name:'📣 Lead Rush',ttl:'LEAD<br>RUSH',
+ how:'Tap the real customers before they go cold. Skip the spam. 3 lost leads and the phone stops ringing.',splash:'Tap the real leads. Skip the spam.',
+ zone:'LEAD GOES COLD',belt:'#172033',r:16,w:98,
+ good:['Need a quote','Call me back','Pricing?','Book a demo','Open Saturday?','Hiring you','Rush order','Can you fix it?'],
+ spam:['FREE $$$','SEO #1 rank!!','Crypto deal','You won!','Buy followers','Re: invoice.zip','Hot singles','Ext. warranty'],
+ look:['Need a qoute?','Pricing? Click','Call me 900#','Book a demo.exe'],
+ levels:[{name:'Grand opening',lanes:3,speed:62,gap:1.0,bad:.40,hint:1,size:1},{name:'Ad goes live',lanes:3,speed:85,gap:.8,bad:.42,hint:1,size:1},
+  {name:'Fourth channel opens',lanes:4,speed:92,gap:.68,bad:.42,hint:1,size:1},{name:'Inbox overload: no labels',lanes:4,speed:96,gap:.64,bad:.42,hint:0,size:1},
+  {name:'Lookalike spam',lanes:4,speed:102,gap:.60,bad:.42,hint:0,size:.6},{name:'Black Friday',lanes:4,speed:110,gap:.54,bad:.42,hint:0,size:.5,mix:1}],
+ init(p,c){const pool=p.t?this.good:(Math.random()>c.size?this.look:this.spam);p.txt=pool[Math.floor(Math.random()*pool.length)];p.ico=p.t?'🙋':(p.txt.includes('.')?'📎':'🤖')},
+ draw(c,p){const w=this.w,h=30;c.fillStyle='#0f2a3d';rr(c,-w/2,-h/2,w,h,9);c.fill();c.lineWidth=2;
+  c.strokeStyle=p.hint?(p.t?'#22c55e':'#475569'):'#38bdf8';c.stroke();
+  c.font='15px sans-serif';c.textAlign='left';c.textBaseline='middle';c.fillText(p.hint?p.ico:'✉️',-w/2+5,1);
+  c.fillStyle='#e2e8f0';c.font='bold 11px sans-serif';c.fillText(p.txt,-w/2+25,1,w-29);c.textBaseline='alphabetic'},
+ hit(p,x,y){return Math.abs(p.x-x)<this.w/2+8&&Math.abs(p.y-y)<26},
+ caught:'leads answered',missed:'spam opened',
+ end:l=>l>=4?'Once the labels go away, most people answer the spam and lose the customer. Ask me about lead follow-up that answers every real lead in seconds.'
+  :'Three customers went cold and called someone else. Ask me about lead follow-up that answers in seconds, day or night.'},
+
+{id:'bourbon',topic:'Bourbon',tab:'🥃 Bourbon',color:'#d97706',name:'🥃 Rickhouse Rush',ttl:'RICKHOUSE<br>RUSH',
+ how:'Tap the leaking barrels before they reach the rickhouse. Leave the sound ones. 3 leakers and the angels take it all.',splash:'Tap the leakers. Save the bourbon.',
+ zone:'RICKHOUSE',belt:'#2a1d12',r:18,
+ levels:[{name:'First fill',lanes:3,speed:66,gap:.95,bad:.30,hint:1,size:1},{name:'Summer heat',lanes:3,speed:90,gap:.76,bad:.32,hint:1,size:1},
+  {name:'Fourth rick opens',lanes:4,speed:96,gap:.64,bad:.33,hint:1,size:1},{name:'Lights out in the rickhouse',lanes:4,speed:100,gap:.60,bad:.33,hint:0,size:1},
+  {name:'Slow seep',lanes:4,speed:110,gap:.55,bad:.35,hint:0,size:.5},{name:'Bottling day',lanes:4,speed:118,gap:.50,bad:.35,hint:0,size:.45,mix:1}],
+ draw(c,p,now){const r=p.r;
+  if(p.t&&p.hint){c.fillStyle='rgba(245,158,11,.35)';c.beginPath();c.arc(0,0,r+5,0,7);c.fill()}
+  c.save();c.rotate(p.rot);c.fillStyle='#7c4a1e';c.beginPath();c.arc(0,0,r,0,7);c.fill();
+  c.strokeStyle='#3f2410';c.lineWidth=1;for(let i=-2;i<=2;i++){c.beginPath();c.moveTo(i*r*.33,-r*.95+Math.abs(i)*2);c.lineTo(i*r*.33,r*.95-Math.abs(i)*2);c.stroke()}
+  c.strokeStyle='#94a3b8';c.lineWidth=2.5;c.beginPath();c.arc(0,0,r-1.5,0,7);c.stroke();c.lineWidth=1.5;c.beginPath();c.arc(0,0,r*.62,0,7);c.stroke();
+  c.fillStyle='#2b1708';c.beginPath();c.arc(r*.35,-r*.2,r*.13,0,7);c.fill();c.restore();
+  if(p.t){const k=p.size,ph=((now/400)+p.seed)%1;c.fillStyle='#f59e0b';
+   c.beginPath();c.ellipse(0,r+2+ph*9*k,2.6*k+.8,4*k+1,0,0,7);c.fill();
+   if(k>=.9){c.fillStyle='rgba(245,158,11,.6)';c.beginPath();c.ellipse(-8,r+4,5,2,0,0,7);c.fill()}}},
+ caught:'leakers pulled',missed:'good barrels dumped',
+ end:l=>l>=4?'In the dark, a slow seep looks like a sound barrel. Building a bourbon, wine or beer brand? Ask me about Timey Wimey.'
+  :'Three leakers made the rickhouse and the angels got more than their share. Building a bourbon brand? Ask me about Timey Wimey.'}
+];
+
+const boards={};let active=0;
+function myKey(){return me.name&&me.company?(me.name+'|'+me.company).toLowerCase():''}
+function renderBoard(gid){const b=boards[gid],G=GAMES.find(g=>g.id===gid);if(!b)return;
+  const t=b.top[0];G.ui.beat.innerHTML=t?`Score to beat: <b>${t.score.toLocaleString()}</b>`:'Be the first on the board';
+  if(GAMES[active].id!==gid)return;
+  $('lbtitle').textContent='Leaderboard · '+G.name.replace(/^\S+\s/,'');
+  $('plays').textContent=b.plays?`${b.plays} game${b.plays>1?'s':''} posted. Can you take the top spot?`:'No scores yet. Be the first on the board.';
+  $('lb').innerHTML='';const k=G.posted?myKey():'';
+  for(const r of b.top){const li=document.createElement('li');if(k&&(r.name+'|'+r.company).toLowerCase()===k)li.className='me';
     const w=document.createElement('div');w.className='who';w.textContent=r.name+' ';const s=document.createElement('span');s.textContent=r.company;w.appendChild(s);
     const lv=document.createElement('span');lv.className='lv';lv.textContent='L'+r.level;const p=document.createElement('div');p.className='pts';p.textContent=r.score.toLocaleString();
     li.append(w,lv,p);$('lb').appendChild(li)}}
-function loadBoard(){call({action:'board'}).then(renderBoard).catch(()=>{$('plays').textContent='Leaderboard is offline for a moment.'})}
-loadBoard();setInterval(()=>{if(!document.hidden&&!run)loadBoard()},30000);
+function loadBoard(gid){return call({action:'board',game:gid}).then(b=>{boards[gid]=b;renderBoard(gid)}).catch(()=>{if(GAMES[active].id===gid)$('plays').textContent='Leaderboard is offline for a moment.'})}
+
+function makeGame(G,idx){
+  const el=$('tpl').content.firstElementChild.cloneNode(true),q=s=>el.querySelector(s);
+  el.querySelector('.game').style.setProperty('--gc',G.color);
+  q('.gname').textContent=G.name;q('.topic').textContent=G.topic;q('.ghow').textContent=G.how;q('.ttl').innerHTML=G.ttl;q('.how').textContent=G.splash;
+  q('.splash').setAttribute('aria-label','Play '+G.name.replace(/^\S+\s/,''));
+  $('deck').appendChild(el);
+  const cv=q('canvas'),cx=cv.getContext('2d'),ui=G.ui={beat:q('.beat')};
+  let W,H,parts=[],run=false,last,spawnT=0,lvl=1,lvT,score,lives,combo,banner,bannerT=0,caught,scrap,shake=0,final={},attractOn=false,gen=0;
+  let best=+localStorage.getItem('hi_best_'+G.id)||(G.id==='quality'?+localStorage.getItem('hi_best')||0:0);q('.best').textContent=best;
+  function size(){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;if(!r.width)return;cv.width=r.width*d;cv.height=r.height*d;cx.setTransform(d,0,0,d,0,0);W=r.width;H=r.height}
+  function L(){const i=Math.min(lvl,G.levels.length)-1,b=G.levels[i],x=Math.max(0,lvl-G.levels.length);
+    return {...b,name:x?`Overtime ${x}`:b.name,speed:b.speed*(1+.12*x),gap:Math.max(.28,b.gap-.03*x),size:Math.max(.35,b.size-.03*x),mix:b.mix||x>0}}
+  const laneY=(i,n)=>H*(i+1)/(n+1);
+  function hud(){q('.hlv').textContent=lvl;q('.sc').textContent=score.toLocaleString();q('.lives').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives)}
+  function showBanner(){banner=`LEVEL ${lvl}: ${L().name}`;bannerT=1.6}
+  function spawn(){const c=L(),lane=Math.floor(Math.random()*c.lanes),half=G.w?G.w/2:G.r;
+    const p={x:-half-4,y:laneY(lane,c.lanes),r:c.lanes>3?G.r-2:G.r,t:Math.random()<c.bad,hint:c.hint,size:c.size,seed:Math.random(),
+      v:c.speed*(c.mix?(.7+Math.random()*.8):(1+Math.random()*.3)),rot:Math.random()*6,dead:0,hit:0};
+    if(G.init)G.init(p,c);parts.push(p)}
+  function item(p,now){cx.save();cx.translate(p.x,p.y);G.draw.call(G,cx,p,now);cx.restore();
+    if(p.hit){cx.globalAlpha=Math.max(0,1-p.dead/.5);cx.fillStyle=p.hit>0?'#22c55e':'#ef4444';cx.font='bold 14px sans-serif';cx.textAlign='center';
+      cx.fillText(p.hit>0?'+'+p.hit:p.hit,p.x,p.y-p.r-6-p.dead*30);cx.globalAlpha=1}}
+  function draw(){if(!W)size();if(!W)return;const now=performance.now();cx.save();if(shake>0)cx.translate((Math.random()-.5)*8,0);cx.clearRect(-10,0,W+20,H);
+    const n=run?L().lanes:3,bh=G.w?36:40;for(let l=0;l<n;l++){const y=laneY(l,n);cx.fillStyle=G.belt;cx.fillRect(0,y-bh/2,W,bh);
+      cx.strokeStyle='#334155';for(let x=((now/12)%24)-24;x<W;x+=24){cx.beginPath();cx.moveTo(x,y-bh/2);cx.lineTo(x,y+bh/2);cx.stroke()}}
+    cx.globalAlpha=.25;cx.fillStyle=G.color;cx.fillRect(W-28,0,28,H);cx.globalAlpha=1;
+    cx.fillStyle=G.color;cx.font='bold 11px sans-serif';cx.save();cx.translate(W-10,H/2);cx.rotate(-Math.PI/2);cx.textAlign='center';cx.fillText(G.zone,0,0);cx.restore();
+    if(run){cx.fillStyle='#334155';cx.fillRect(0,0,W,4);cx.fillStyle=G.color;cx.fillRect(0,0,W*Math.min(1,lvT/LEVEL_SECS),4)}
+    for(const p of parts){if(p.dead)cx.globalAlpha=Math.max(0,1-p.dead/.5);item(p,now);cx.globalAlpha=1}
+    if(combo>=5&&run){cx.fillStyle='#22c55e';cx.font='bold 13px sans-serif';cx.textAlign='left';cx.fillText(`COMBO x${1+Math.floor(combo/5)}`,8,20)}
+    if(bannerT>0){cx.globalAlpha=Math.min(1,bannerT);cx.fillStyle='rgba(11,18,32,.85)';cx.fillRect(0,H/2-24,W,48);cx.fillStyle=G.color;
+      cx.font='bold 18px sans-serif';cx.textAlign='center';cx.fillText(banner,W/2,H/2+6);cx.globalAlpha=1}
+    cx.restore()}
+  const edge=p=>p.x+(G.w?G.w/2:0)>W-28;
+  function loop(now){if(!run)return;const dt=Math.min(.05,(now-last)/1000);last=now;
+    lvT+=dt;if(lvT>=LEVEL_SECS){lvT=0;lvl++;score+=100*lvl;showBanner();hud()}
+    bannerT-=dt;shake-=dt;spawnT-=dt;if(spawnT<=0){spawn();spawnT=L().gap*(.8+Math.random()*.4)}
+    for(const p of parts){if(p.dead){p.dead+=dt;continue}p.x+=p.v*dt;if(!G.w)p.rot+=dt*2;
+      if(edge(p)){p.dead=.001;if(p.t){lives--;combo=0;shake=.3;p.hit=0;if(navigator.vibrate)navigator.vibrate(120);hud();if(lives<=0)return end()}else{score+=1;hud()}}}
+    parts=parts.filter(p=>p.dead<.5);draw();requestAnimationFrame(loop)}
+  function tap(ev){if(!run)return;ev.preventDefault();const r=cv.getBoundingClientRect(),pt=ev.touches?ev.touches[0]:ev,x=pt.clientX-r.left,y=pt.clientY-r.top;
+    let bp=null,bd=1e9;for(const p of parts){if(p.dead)continue;const d=Math.hypot(p.x-x,p.y-y);if((G.hit?G.hit(p,x,y):d<p.r+14)&&d<bd){bd=d;bp=p}}
+    if(!bp)return;bp.dead=.001;
+    if(bp.t){combo++;caught++;const pts=10*lvl*(1+Math.floor(combo/5));score+=pts;bp.hit=pts}
+    else{combo=0;scrap++;score=Math.max(0,score-15*lvl);bp.hit=-15*lvl;if(navigator.vibrate)navigator.vibrate(40)}hud()}
+  cv.addEventListener('touchstart',tap,{passive:false});cv.addEventListener('mousedown',tap);
+  function attract(now,g){if(run||!attractOn||g!==gen){return}const dt=Math.min(.05,(now-(attract.t||now))/1000);attract.t=now;
+    spawnT-=dt;if(spawnT<=0){spawn();spawnT=.7}
+    for(const p of parts){p.x+=p.v*.6*dt;if(!G.w)p.rot+=dt*2;if(edge(p))p.dead=1}parts=parts.filter(p=>!p.dead);draw();requestAnimationFrame(t=>attract(t,g))}
+  function setAttract(on){if(on===attractOn)return;attractOn=on;if(on&&!run&&q('.splash').style.display!=='none'){lvl=1;attract.t=0;const g=++gen;requestAnimationFrame(t=>attract(t,g))}}
+  function start(){GAMES.forEach(g=>g!==G&&g.api.stop());size();parts=[];lvl=1;lvT=0;score=0;lives=3;combo=0;caught=scrap=0;spawnT=.3;showBanner();hud();
+    run=true;$('deck').classList.add('locked');q('.splash').style.display='none';q('.result').style.display='none';last=performance.now();requestAnimationFrame(loop)}
+  function end(){run=false;$('deck').classList.remove('locked');draw();final={score,level:lvl};
+    if(score>best){best=score;localStorage.setItem('hi_best_'+G.id,best);q('.best').textContent=best}
+    q('.score').textContent=score.toLocaleString();q('.reached').textContent=`Reached level ${lvl}: ${L().name}. ${caught} ${G.caught}, ${scrap} ${G.missed}.`;
+    q('.endmsg').textContent=G.end(lvl);
+    const f=q('.postf');fill(f);const known=me.name&&me.company&&(me.email||me.phone);q('.postfields').style.display=known?'none':'block';
+    q('.postbtn').textContent=known?`Post as ${me.name} (${me.company})`:'Post my score';q('.postbtn').disabled=false;q('.postmsg').textContent='';
+    q('.result').style.display='block';q('.result').scrollIntoView({behavior:'smooth',block:'nearest'})}
+  q('.postf').addEventListener('submit',async e=>{e.preventDefault();const f=e.target,m=q('.postmsg');
+    const d=q('.postfields').style.display==='none'?{name:me.name,company:me.company,email:me.email||'',phone:me.phone||''}:formData(f);
+    const err=check(d);if(err){q('.postfields').style.display='block';return say(m,err)}
+    q('.postbtn').disabled=true;say(m,'Posting…',true);
+    try{const r=await call({action:'score',game:G.id,...d,score:final.score,level:final.level});if(!r.ok)throw new Error(r.error);
+      remember(d);G.posted=1;boards[G.id]=r;renderBoard(G.id);
+      say(m,r.rank===1?'You are #1. Defend it.':`You are #${r.rank}. ${r.rank<=10?'You made the board.':'Play again to climb.'}`,true);q('.postbtn').textContent='Posted ✓';
+      $('board').scrollIntoView({behavior:'smooth',block:'nearest'})}
+    catch(x){say(m,x.message||'Could not post. Try again.');q('.postbtn').disabled=false}});
+  q('.splash').onclick=start;q('.again').onclick=start;
+  addEventListener('resize',()=>{if(!run){size();draw()}});
+  G.api={stop(){if(run){run=false;$('deck').classList.remove('locked');parts=[];bannerT=0;draw();q('.splash').style.display='';attractOn=false;setAttract(GAMES[active]===G)}},
+    show(on){if(!W){size()}setAttract(on);if(!on)return;if(!run)draw()},running:()=>run};
+}
+GAMES.forEach(makeGame);
+
+// tabs, dots and swipe
+GAMES.forEach((G,i)=>{const b=document.createElement('button');b.type='button';b.textContent=G.tab;b.style.setProperty('--gc',G.color);b.setAttribute('role','tab');
+  b.onclick=()=>go(i);$('tabs').appendChild(b);$('dots').appendChild(document.createElement('i'))});
+function go(i){const d=$('deck');if(d.classList.contains('locked'))GAMES[active].api.stop();d.scrollTo({left:i*d.clientWidth,behavior:'smooth'})}
+function setActive(i){if(i===active&&setActive.done)return;const prev=active;active=i;setActive.done=1;
+  if(prev!==i&&GAMES[prev].api.running())GAMES[prev].api.stop();
+  [...$('tabs').children].forEach((b,j)=>b.classList.toggle('on',j===i));[...$('dots').children].forEach((d,j)=>d.classList.toggle('on',j===i));
+  GAMES.forEach((g,j)=>g.api.show(j===i));
+  $('swipehint').innerHTML=i<GAMES.length-1?'Swipe for more games <span class="nudge">→</span>':'<span class="nudge">←</span> Swipe back';
+  if(boards[GAMES[i].id])renderBoard(GAMES[i].id);else{$('lbtitle').textContent='Leaderboard · '+GAMES[i].name.replace(/^\S+\s/,'');$('plays').textContent='Loading…';$('lb').innerHTML=''}
+  if(i>0)localStorage.setItem('hi_swiped','1')}
+let st;$('deck').addEventListener('scroll',()=>{clearTimeout(st);st=setTimeout(()=>{const d=$('deck');setActive(Math.round(d.scrollLeft/d.clientWidth))},80)},{passive:true});
+requestAnimationFrame(()=>setActive(0));
+GAMES.forEach(g=>loadBoard(g.id));
+setInterval(()=>{if(!document.hidden&&!GAMES.some(g=>g.api.running()))loadBoard(GAMES[active].id)},30000);
 
 // Swap contacts
 fill($('swapf'));
@@ -183,88 +362,10 @@ if(me.sent){$('openswap').textContent='Sent to Justin ✓';$('openswap').classLi
 $('openswap').addEventListener('click',()=>openSwap(true));
 $('save').addEventListener('click',()=>{if(me.sent)return;setTimeout(()=>openSwap(true),900)});
 $('swapf').addEventListener('submit',async e=>{e.preventDefault();const f=e.target,d=formData(f),m=$('swapmsg'),err=check(d);if(err)return say(m,err);
-  const b=f.querySelector('button');b.disabled=true;say(m,'Sending…',true);
+  const b=f.querySelector('button[type=submit]');b.disabled=true;say(m,'Sending…',true);
   try{const r=await call({action:'lead',...d});if(!r.ok)throw new Error(r.error);remember(d);me.sent=1;localStorage.setItem('hi_me',JSON.stringify(me));
     say(m,`Got it, ${d.name.split(' ')[0]}. Justin will be in touch.`,true);$('swap').classList.remove('hl');b.textContent='Sent ✓'}
   catch(x){say(m,x.message||'Could not send. Try again.');b.disabled=false}});
-
-// Game
-const cv=$('cv'),cx=cv.getContext('2d');
-let W,H,parts=[],run=false,last,spawnT,lvl,lvT,score,lives,combo,banner,bannerT,caught,scrap,shake=0;
-let best=+localStorage.getItem('hi_best')||0;$('best').textContent=best;
-function size(){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;cv.width=r.width*d;cv.height=r.height*d;cx.setTransform(d,0,0,d,0,0);W=r.width;H=r.height}
-size();addEventListener("resize",()=>{size();if(!run)draw()});
-const LEVELS=[
- {name:'Day shift',lanes:3,speed:70,gap:.95,bad:.30,red:1,crack:1},
- {name:'Rush order',lanes:3,speed:95,gap:.75,bad:.32,red:1,crack:1},
- {name:'Fourth line opens',lanes:4,speed:100,gap:.62,bad:.33,red:1,crack:1},
- {name:'Night shift: no red paint',lanes:4,speed:105,gap:.60,bad:.33,red:0,crack:1},
- {name:'Hairline cracks',lanes:4,speed:115,gap:.55,bad:.35,red:0,crack:.55},
- {name:'Mixed speeds',lanes:4,speed:120,gap:.50,bad:.35,red:0,crack:.5,mix:1},
-];
-function L(){const i=Math.min(lvl,LEVELS.length)-1,b=LEVELS[i],x=Math.max(0,lvl-LEVELS.length);
-  return {...b,name:x?`Overtime ${x}`:b.name,speed:b.speed*(1+.12*x),gap:Math.max(.28,b.gap-.03*x),crack:Math.max(.35,b.crack-.03*x),mix:b.mix||x>0}}
-const LEVEL_SECS=15;
-function laneY(i,n){return H*(i+1)/(n+1)}
-function hud(){$('lv').textContent=lvl;$('sc').textContent=score.toLocaleString();$('hp').textContent='❤️'.repeat(lives)+'🖤'.repeat(3-lives)}
-function reset(){parts=[];lvl=1;lvT=0;score=0;lives=3;combo=0;caught=scrap=0;spawnT=.3;showBanner();hud()}
-function showBanner(){banner=`LEVEL ${lvl}: ${L().name}`;bannerT=1.6}
-function spawn(){const c=L(),lane=Math.floor(Math.random()*c.lanes),r=c.lanes>3?16:18;
-  parts.push({x:-30,y:laneY(lane,c.lanes),r,bad:Math.random()<c.bad,red:c.red,crack:c.crack,v:c.speed*(c.mix?(.7+Math.random()*.8):(1+Math.random()*.3)),rot:Math.random()*6,dead:0,hit:0})}
-function gear(p){cx.save();cx.translate(p.x,p.y);cx.rotate(p.rot);
-  cx.fillStyle=p.bad&&p.red?'#b91c1c':'#64748b';cx.beginPath();
-  for(let i=0;i<16;i++){const a=i*Math.PI/8,rr=i%2?p.r:p.r*0.78;cx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}cx.closePath();cx.fill();
-  cx.fillStyle='#0b1220';cx.beginPath();cx.arc(0,0,p.r*0.32,0,7);cx.fill();
-  if(p.bad){const k=p.crack;cx.strokeStyle=p.red?'#fecaca':'#e2e8f0';cx.lineWidth=k<1?1.3:2;cx.beginPath();
-    cx.moveTo(-p.r*.6*k,-p.r*.5*k);cx.lineTo(-p.r*.1*k,0);cx.lineTo(-p.r*.3*k,p.r*.2*k);cx.lineTo(p.r*.4*k,p.r*.6*k);cx.stroke()}
-  cx.restore();
-  if(p.hit){cx.globalAlpha=Math.max(0,1-p.dead/.5);cx.fillStyle=p.hit>0?'#22c55e':'#ef4444';cx.font='bold 14px sans-serif';cx.textAlign='center';
-    cx.fillText(p.hit>0?'+'+p.hit:p.hit,p.x,p.y-p.r-6-p.dead*30);cx.globalAlpha=1}}
-function draw(){cx.save();if(shake>0)cx.translate((Math.random()-.5)*8,0);cx.clearRect(-10,0,W+20,H);
-  const n=run?L().lanes:3;for(let l=0;l<n;l++){const y=laneY(l,n);cx.fillStyle='#1f2937';cx.fillRect(0,y-20,W,40);
-    cx.strokeStyle='#334155';for(let x=((performance.now()/12)%24)-24;x<W;x+=24){cx.beginPath();cx.moveTo(x,y-20);cx.lineTo(x,y+20);cx.stroke()}}
-  cx.fillStyle='rgba(245,158,11,.25)';cx.fillRect(W-28,0,28,H);
-  cx.fillStyle='#f59e0b';cx.font='bold 11px sans-serif';cx.save();cx.translate(W-10,H/2);cx.rotate(-Math.PI/2);cx.textAlign='center';cx.fillText('SHIP TO CUSTOMER',0,0);cx.restore();
-  if(run){cx.fillStyle='#334155';cx.fillRect(0,0,W,4);cx.fillStyle='#f59e0b';cx.fillRect(0,0,W*Math.min(1,lvT/LEVEL_SECS),4)}
-  for(const p of parts){if(p.dead){cx.globalAlpha=Math.max(0,1-p.dead/.5);gear(p);cx.globalAlpha=1}else gear(p)}
-  if(combo>=5&&run){cx.fillStyle='#22c55e';cx.font='bold 13px sans-serif';cx.textAlign='left';cx.fillText(`COMBO x${1+Math.floor(combo/5)}`,8,20)}
-  if(bannerT>0){cx.globalAlpha=Math.min(1,bannerT);cx.fillStyle='rgba(11,18,32,.85)';cx.fillRect(0,H/2-24,W,48);cx.fillStyle='#f59e0b';
-    cx.font='bold 18px sans-serif';cx.textAlign='center';cx.fillText(banner,W/2,H/2+6);cx.globalAlpha=1}
-  cx.restore()}
-function loop(now){if(!run)return;const dt=Math.min(.05,(now-last)/1000);last=now;
-  lvT+=dt;if(lvT>=LEVEL_SECS){lvT=0;lvl++;score+=100*lvl;showBanner();hud()}
-  bannerT-=dt;shake-=dt;spawnT-=dt;if(spawnT<=0){spawn();spawnT=L().gap*(.8+Math.random()*.4)}
-  for(const p of parts){if(p.dead){p.dead+=dt;continue}p.x+=p.v*dt;p.rot+=dt*2;
-    if(p.x>W-28){p.dead=.001;if(p.bad){lives--;combo=0;shake=.3;p.hit=0;if(navigator.vibrate)navigator.vibrate(120);hud();if(lives<=0)return end()}else{score+=1;hud()}}}
-  parts=parts.filter(p=>p.dead<.5);draw();requestAnimationFrame(loop)}
-function tap(ev){if(!run)return;ev.preventDefault();const r=cv.getBoundingClientRect(),pt=ev.touches?ev.touches[0]:ev,x=pt.clientX-r.left,y=pt.clientY-r.top;
-  let bp=null,bd=1e9;for(const p of parts){if(p.dead)continue;const d=Math.hypot(p.x-x,p.y-y);if(d<p.r+14&&d<bd){bd=d;bp=p}}
-  if(!bp)return;bp.dead=.001;
-  if(bp.bad){combo++;caught++;const pts=10*lvl*(1+Math.floor(combo/5));score+=pts;bp.hit=pts}
-  else{combo=0;scrap++;score=Math.max(0,score-15*lvl);bp.hit=-15*lvl;if(navigator.vibrate)navigator.vibrate(40)}hud()}
-cv.addEventListener('touchstart',tap,{passive:false});cv.addEventListener('mousedown',tap);
-function attract(now){if(run||$('splash').style.display==='none')return;const dt=Math.min(.05,(now-(attract.t||now))/1000);attract.t=now;
-  if(!lvl)lvl=1;spawnT=(spawnT||0)-dt;if(spawnT<=0){spawn();spawnT=.7}
-  for(const p of parts){p.x+=p.v*.6*dt;p.rot+=dt*2;if(p.x>W-28)p.dead=1}parts=parts.filter(p=>!p.dead);draw();requestAnimationFrame(attract)}
-function start(){size();reset();run=true;$('splash').style.display='none';$('res').style.display='none';last=performance.now();requestAnimationFrame(loop)}
-let final={};
-function end(){run=false;draw();final={score,level:lvl};
-  if(score>best){best=score;localStorage.setItem('hi_best',best);$('best').textContent=best}
-  $('score').textContent=score.toLocaleString();$('reached').textContent=`Reached level ${lvl}: ${L().name}. ${caught} caught, ${scrap} good parts scrapped.`;
-  $('msg').textContent=lvl>=4?'Most people miss the cracks once the red paint goes away. A camera on the line does not blink. Ask me about vision inspection.'
-    :'Three escapes reached the customer. A camera on the line does not blink. Ask me about vision inspection.';
-  const f=$('postf');fill(f);const known=me.name&&me.company&&(me.email||me.phone);$('postfields').style.display=known?'none':'block';
-  $('postbtn').textContent=known?`Post as ${me.name} (${me.company})`:'Post my score';$('postbtn').disabled=false;$('postmsg').textContent='';
-  $('res').style.display='block';$('res').scrollIntoView({behavior:'smooth',block:'nearest'})}
-$('postf').addEventListener('submit',async e=>{e.preventDefault();const f=e.target,m=$('postmsg');
-  const d=$('postfields').style.display==='none'?{name:me.name,company:me.company,email:me.email||'',phone:me.phone||''}:formData(f);
-  const err=check(d);if(err){$('postfields').style.display='block';return say(m,err)}
-  $('postbtn').disabled=true;say(m,'Posting…',true);
-  try{const r=await call({action:'score',...d,score:final.score,level:final.level});if(!r.ok)throw new Error(r.error);
-    remember(d);myScoreKey=(d.name+'|'+d.company).toLowerCase();renderBoard(r);
-    say(m,r.rank===1?'You are #1. Defend it.':`You are #${r.rank}. ${r.rank<=10?'You made the board.':'Run another shift to climb.'}`,true);$('postbtn').textContent='Posted ✓'}
-  catch(x){say(m,x.message||'Could not post. Try again.');$('postbtn').disabled=false}});
-$("splash").onclick=start;$("again").onclick=start;requestAnimationFrame(()=>{size();parts=[];requestAnimationFrame(attract)});
 </script>
 </body>
 </html>
