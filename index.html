@@ -11,8 +11,11 @@
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh;padding:env(safe-area-inset-top) 16px 32px}
   .wrap{max-width:440px;margin:0 auto}
-  header{padding:20px 0 12px}
-  h1{font-size:26px}
+  header{padding:12px 0 2px}
+  .top{display:flex;align-items:center;gap:12px;justify-content:space-between}
+  .pill{flex:none;background:var(--acc);color:#111;font-weight:800;font-size:14px;line-height:1.15;text-align:center;text-decoration:none;padding:9px 14px;border-radius:12px}
+  #game{margin-top:10px}
+  h1{font-size:23px}
   .sub{color:var(--mute)}
   .card{background:var(--panel);border-radius:16px;padding:16px;margin-top:14px}
   .btn{display:block;width:100%;text-align:center;padding:14px;border-radius:12px;font-weight:700;font-size:17px;text-decoration:none;border:0;margin-top:10px;cursor:pointer;font-family:inherit}
@@ -45,36 +48,15 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>Justin Hamilton</h1>
-    <div class="sub">President, Hamilton Development Company</div>
-    <div class="sub">Automation, software, web and marketing. 15 years in Kentucky plants.</div>
+    <div class="top">
+      <div><h1>Justin Hamilton</h1><div class="sub">President, Hamilton Development Company</div></div>
+      <a class="pill" id="save" href="justin-hamilton.vcf" download>Save my<br>contact</a>
+    </div>
   </header>
-
-  <a class="btn primary" id="save" href="justin-hamilton.vcf" download>Save my contact</a>
-  <div class="row">
-    <a class="btn ghost" href="tel:+15022031154">Call</a>
-    <a class="btn ghost" href="sms:+15022031154">Text</a>
-    <a class="btn ghost" href="mailto:justin.hamilton@hamiltondevco.com?subject=Met%20you%20in%20Owensboro">Email</a>
-  </div>
-
-  <div class="card" id="swap">
-    <h2>Swap contacts</h2>
-    <div class="small">Leave yours and I will follow up. 30 seconds.</div>
-    <form id="swapf" autocomplete="on">
-      <input name="name" placeholder="Your name" autocomplete="name" required>
-      <input name="company" placeholder="Company" autocomplete="organization" required>
-      <input name="email" type="email" placeholder="Email" autocomplete="email" inputmode="email">
-      <input name="phone" type="tel" placeholder="Phone (or email above)" autocomplete="tel">
-      <input name="note" placeholder="What are you working on? (optional)">
-      <input name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <button class="btn primary" type="submit">Send Justin my info</button>
-      <div class="msg" id="swapmsg"></div>
-    </form>
-  </div>
 
   <div class="card" id="game">
     <h2>Quality Gate</h2>
-    <div class="small">Tap the cracked parts before they ship. Leave the good ones alone. Three escapes and the customer shuts your line down. Every level gets harder.</div>
+    <div class="small">Tap the cracked parts before they ship. Leave good ones alone. 3 escapes and your line is down.</div>
     <div class="hud"><span>Level <b id="lv">1</b></span><span>Score <b id="sc">0</b></span><span>Line <b id="hp">❤️❤️❤️</b></span><span>Best <b id="best">0</b></span></div>
     <canvas id="cv"></canvas>
     <button class="btn primary" id="go">Start the line</button>
@@ -96,6 +78,27 @@
         <div class="msg" id="postmsg"></div>
       </form>
       <button class="btn ghost" id="again">Run another shift</button>
+    </div>
+  </div>
+
+  <div class="card" id="swap">
+    <button class="btn primary" type="button" id="openswap" style="margin-top:0">Send Justin my contact</button>
+    <form id="swapf" autocomplete="on" hidden>
+      <div class="small" style="margin-top:10px">Leave yours and I will follow up. 30 seconds.</div>
+      <input name="name" placeholder="Your name" autocomplete="name" required>
+      <input name="company" placeholder="Company" autocomplete="organization" required>
+      <input name="email" type="email" placeholder="Email" autocomplete="email" inputmode="email">
+      <input name="phone" type="tel" placeholder="Phone (or email above)" autocomplete="tel">
+      <input name="note" placeholder="What are you working on? (optional)">
+      <input name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button class="btn primary" type="submit">Send it</button>
+      <div class="msg" id="swapmsg"></div>
+    </form>
+    <div class="sub" style="margin-top:14px">Automation, software, web and marketing. 15 years in Kentucky plants.</div>
+    <div class="row">
+      <a class="btn ghost" href="tel:+15022031154">Call</a>
+      <a class="btn ghost" href="sms:+15022031154">Text</a>
+      <a class="btn ghost" href="mailto:justin.hamilton@hamiltondevco.com?subject=Met%20you%20in%20Owensboro">Email</a>
     </div>
   </div>
 
@@ -139,7 +142,11 @@ loadBoard();setInterval(()=>{if(!document.hidden&&!run)loadBoard()},30000);
 
 // Swap contacts
 fill($('swapf'));
-$('save').addEventListener('click',()=>{if(me.sent)return;setTimeout(()=>{$('swap').scrollIntoView({behavior:'smooth',block:'center'});$('swap').classList.add('hl');$('swapf').name.focus({preventScroll:true})},900)});
+function openSwap(focus){$('swapf').hidden=false;$('openswap').style.display='none';$('swap').classList.add('hl');
+  $('swap').scrollIntoView({behavior:'smooth',block:'start'});if(focus)$('swapf').name.focus({preventScroll:true})}
+if(me.sent){$('openswap').textContent='Sent to Justin ✓';$('openswap').classList.replace('primary','ghost')}
+$('openswap').addEventListener('click',()=>openSwap(true));
+$('save').addEventListener('click',()=>{if(me.sent)return;setTimeout(()=>openSwap(true),900)});
 $('swapf').addEventListener('submit',async e=>{e.preventDefault();const f=e.target,d=formData(f),m=$('swapmsg'),err=check(d);if(err)return say(m,err);
   const b=f.querySelector('button');b.disabled=true;say(m,'Sending…',true);
   try{const r=await call({action:'lead',...d});if(!r.ok)throw new Error(r.error);remember(d);me.sent=1;localStorage.setItem('hi_me',JSON.stringify(me));
