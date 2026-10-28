@@ -30,6 +30,7 @@
   h2{font-size:18px;margin-bottom:4px}
   .small{font-size:13px;color:var(--mute)}
   input{width:100%;padding:12px;border-radius:10px;border:1px solid #334155;background:#0b1220;color:var(--ink);font-size:16px;margin-top:8px;font-family:inherit}
+  .pick{margin-top:10px;padding:10px;font-size:15px}.iostip{margin-top:8px}
   .hp{position:absolute;left:-9999px;height:0;width:0;opacity:0}
   .msg{margin-top:8px;font-size:14px;min-height:1em}
   .msg.ok{color:var(--ok)}.msg.err{color:#fca5a5}
@@ -65,9 +66,10 @@
       <div class="big" id="score">0</div>
       <div class="small" id="reached"></div>
       <div id="msg" class="small" style="margin-top:6px"></div>
-      <form id="postf">
+      <form id="postf" autocomplete="on">
         <div id="postfields">
           <div class="small" style="margin-top:12px">Post it to the leaderboard. Name and company show. Your email or phone goes only to Justin.</div>
+          <button class="btn ghost pick" type="button" hidden>Fill from my phone contacts</button><div class="small iostip" hidden>Tip: tap "Your name", then tap <b>AutoFill Contact</b> above the keyboard.</div>
           <input name="name" placeholder="Your name" autocomplete="name" required>
           <input name="company" placeholder="Company" autocomplete="organization" required>
           <input name="email" type="email" placeholder="Email" autocomplete="email" inputmode="email">
@@ -85,6 +87,7 @@
     <button class="btn primary" type="button" id="openswap" style="margin-top:0">Send Justin my contact</button>
     <form id="swapf" autocomplete="on" hidden>
       <div class="small" style="margin-top:10px">Leave yours and I will follow up. 30 seconds.</div>
+      <button class="btn ghost pick" type="button" hidden>Fill from my phone contacts</button><div class="small iostip" hidden>Tip: tap "Your name", then tap <b>AutoFill Contact</b> above the keyboard.</div>
       <input name="name" placeholder="Your name" autocomplete="name" required>
       <input name="company" placeholder="Company" autocomplete="organization" required>
       <input name="email" type="email" placeholder="Email" autocomplete="email" inputmode="email">
@@ -142,7 +145,17 @@ loadBoard();setInterval(()=>{if(!document.hidden&&!run)loadBoard()},30000);
 
 // Swap contacts
 fill($('swapf'));
-function openSwap(focus){$('swapf').hidden=false;$('openswap').style.display='none';$('swap').classList.add('hl');
+// Autofill: Android Chrome can open the contact picker; iPhone offers AutoFill Contact above the keyboard.
+const canPick='contacts' in navigator&&'ContactsManager' in window;
+const isIOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+document.querySelectorAll('form .pick').forEach(btn=>{const f=btn.form;
+  if(canPick)btn.hidden=false;else if(isIOS)f.querySelector('.iostip').hidden=false;
+  btn.addEventListener('click',async()=>{try{const props=await navigator.contacts.getProperties();
+    const want=['name','email','tel'].filter(k=>props.includes(k));
+    const [c]=await navigator.contacts.select(want,{multiple:false});if(!c)return;
+    if(c.name&&c.name[0])f.name.value=c.name[0];if(c.email&&c.email[0])f.email.value=c.email[0];if(c.tel&&c.tel[0])f.phone.value=c.tel[0];
+    (f.company.value?f.querySelector('button[type=submit]'):f.company).focus()}catch(x){}})});
+function openSwap(focus){fill($('swapf'));$('swapf').hidden=false;$('openswap').style.display='none';$('swap').classList.add('hl');
   $('swap').scrollIntoView({behavior:'smooth',block:'start'});if(focus)$('swapf').name.focus({preventScroll:true})}
 if(me.sent){$('openswap').textContent='Sent to Justin ✓';$('openswap').classList.replace('primary','ghost')}
 $('openswap').addEventListener('click',()=>openSwap(true));
